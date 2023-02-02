@@ -1,18 +1,13 @@
-import User from "../models/UserModel";
+import dotenv from "dotenv";
+dotenv.config();
+import User from "../models/UserModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
-const Register = async (req, res) => {
+export const Register = async (req, res) => {
   try {
-    const {
-      firstName,
-      lastName,
-      email,
-      picturePath,
-      occupation,
-      location,
-      password,
-    } = req.body;
+    const { firstName, lastName, email, occupation, location, password } =
+      req.body;
 
     const user = await User.findOne({ email: email });
     if (user) {
@@ -24,12 +19,11 @@ const Register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const newUser = await User.create({
-      firstName,
-      lastName,
-      email,
-      location,
-      picturePath,
-      occupation,
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      location: location,
+      occupation: occupation,
       password: hashedPassword,
       impressions: Math.floor(Math.random() * 1000),
       viewedProfile: Math.floor(Math.random() * 1000),
@@ -50,7 +44,7 @@ const Register = async (req, res) => {
       });
     }
   } catch (error) {
-    console.log();
+    console.log(error);
     return res.status(500).json({
       status: "failed",
       msg: "error registration",
@@ -59,7 +53,7 @@ const Register = async (req, res) => {
   }
 };
 
-const Login = async (req, res) => {
+export const Login = async (req, res) => {
   try {
     const { email, password } = req.body;
     const isExisting = await User.findOne({ email: email });
@@ -76,10 +70,14 @@ const Login = async (req, res) => {
         msg: "Password/Email is wrong",
       });
     }
-    const token = await jwt.sign({
-      id: isExisting._id,
-      email: isExisting.email,
-    });
+    const token = await jwt.sign(
+      {
+        id: isExisting._id,
+        email: isExisting.email,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRY_TIME }
+    );
     if (token) {
       return res.status(200).json({
         status: "success",
@@ -93,10 +91,10 @@ const Login = async (req, res) => {
       msg: "Something went wrong, try again",
     });
   } catch (error) {
-    console.log();
+    console.log(error);
     return res.status(500).json({
       status: "failed",
-      msg: "error registration",
+      msg: "error occured at login",
       data: error.message,
     });
   }

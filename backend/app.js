@@ -9,6 +9,7 @@ import multer from "multer";
 import jwt from "jsonwebtoken";
 import path from "path";
 import { fileURLToPath } from "url";
+import AuthRoutes from "./routes/AuthRoutes.js";
 
 //configs
 const __filename = fileURLToPath(import.meta.url);
@@ -39,6 +40,8 @@ const upload = multer({ storage });
 
 const port = process.env.PORT || 6001;
 
+app.use("/api/v1/auth", AuthRoutes);
+
 const start = async () => {
   try {
     mongoose.set("strictQuery", false);
@@ -56,15 +59,19 @@ const start = async () => {
       })
       .catch((error) => {
         console.log(error);
-        return res
-          .status(500)
-          .json({ status: "failed", msg: "Server Cant start", error: error });
+        return res.status(500).json({
+          status: "failed",
+          msg: "Server Cant start",
+          error: error.message,
+        });
       });
   } catch (error) {
     console.log(error);
-    return res
-      .status(500)
-      .json({ status: "failed", msg: "Server Cant start", error: error });
+    return res.status(500).json({
+      status: "failed",
+      msg: "Server Cant start",
+      error: error.message,
+    });
   }
 };
 
