@@ -10,6 +10,8 @@ import jwt from "jsonwebtoken";
 import path from "path";
 import { fileURLToPath } from "url";
 import AuthRoutes from "./routes/AuthRoutes.js";
+import { auth } from "./middleware/AuthTokenMiddleware.js";
+import { Register } from "./controllers/AuthController.js";
 
 //configs
 const __filename = fileURLToPath(import.meta.url);
@@ -37,10 +39,12 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
+//register with files
+app.post("/api/v1/auth/register", Register);
 
 const port = process.env.PORT || 6001;
 
-app.use("/api/v1/auth", AuthRoutes);
+app.use("/api/v1/auth", upload.single("picture"), AuthRoutes);
 
 const start = async () => {
   try {

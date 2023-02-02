@@ -6,8 +6,7 @@ import bcrypt from "bcryptjs";
 
 export const Register = async (req, res) => {
   try {
-    const { firstName, lastName, email, occupation, location, password } =
-      req.body;
+    const { firstName, lastName, email, occupation, location } = req.body;
 
     const user = await User.findOne({ email: email });
     if (user) {
@@ -16,7 +15,7 @@ export const Register = async (req, res) => {
         .json({ status: "failed", msg: "Email already taken" });
     }
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
     const newUser = await User.create({
       firstName: firstName,
@@ -29,6 +28,8 @@ export const Register = async (req, res) => {
       viewedProfile: Math.floor(Math.random() * 1000),
     });
 
+    const { password, ...others } = newUser._doc;
+
     if (newUser) {
       const token = await jwt.sign(
         { id: newUser._id, email: newUser.email },
@@ -39,7 +40,7 @@ export const Register = async (req, res) => {
       return res.status(201).json({
         status: "success",
         msg: "registration is a success",
-        data: newUser,
+        data: others,
         token: token,
       });
     }
@@ -55,7 +56,7 @@ export const Register = async (req, res) => {
 
 export const Login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email } = req.body;
     const isExisting = await User.findOne({ email: email });
     if (!isExisting) {
       return res.status(500).json({
@@ -63,13 +64,17 @@ export const Login = async (req, res) => {
         msg: "Email Not Found",
       });
     }
-    const isMatch = await bcrypt.compare(password, isExisting.password);
+    const isMatch = await bcrypt.compare(
+      req.body.password,
+      isExisting.password
+    );
     if (!isMatch) {
       return res.status(500).json({
         status: "failed",
         msg: "Password/Email is wrong",
       });
     }
+
     const token = await jwt.sign(
       {
         id: isExisting._id,
@@ -78,11 +83,13 @@ export const Login = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRY_TIME }
     );
+
+    const { password, ...others } = isExisting._doc;
     if (token) {
       return res.status(200).json({
         status: "success",
         msg: "Login is a success",
-        data: isExisting,
+        data: others,
         token: token,
       });
     }
