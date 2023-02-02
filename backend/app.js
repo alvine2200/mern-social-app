@@ -39,7 +39,7 @@ const upload = multer({ storage });
 
 const port = process.env.PORT || 6001;
 
-const start = async (url) => {
+const start = async () => {
   try {
     mongoose.set("strictQuery", false);
     await mongoose
@@ -60,7 +60,6 @@ const start = async (url) => {
           .status(500)
           .json({ status: "failed", msg: "Server Cant start", error: error });
       });
-    return;
   } catch (error) {
     console.log(error);
     return res
