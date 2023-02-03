@@ -1,4 +1,3 @@
-import strictTransportSecurity from "helmet/dist/types/middlewares/strict-transport-security";
 import mongoose from "mongoose";
 
 const PostSchema = new mongoose.Schema(
