@@ -1,11 +1,13 @@
 import Post from "../models/PostModel.js";
 import User from "../models/UserModel.js";
 
-export const CreatePost = async (req, file) => {
+export const CreatePost = async (req, res) => {
   try {
     const { id } = req.user.userId;
     const { description, picturePath } = req.body;
-    const user = await User.findById({ _id: id });
+    console.log(id);
+    const user = await User.findById(id);
+    console.log(user);
     const newPost = await Post.create({
       userId: id,
       firstName: user.firstName,
