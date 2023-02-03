@@ -8,6 +8,6 @@ const router = express.Router();
 
 router.get("/:userId/posts", getUserPosts);
 router.get("/", getFeedsPosts);
-router.post("/:id/like", likePost);
+router.patch("/:id/like", likePost);
 
 export default router;
